@@ -13,6 +13,7 @@ TEST_DIR := ./...
 
 # Flag variable
 URL ?= ""
+DEPTH ?= ""
 
 # Default target
 .PHONY: all
@@ -60,4 +61,4 @@ tidy:
 .PHONY: run
 run: build
 	@echo "Running the application with URL=$(URL)"
-	$(BIN_DIR)/$(APP_NAME) -url=$(URL)
+	$(BIN_DIR)/$(APP_NAME) -url=$(URL) -depth=$(DEPTH)
