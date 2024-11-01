@@ -46,6 +46,10 @@ func Crawl(urlStr string, maxDepth int, keepFn func(string) bool) ([]string, err
 	for i := 0; i <= maxDepth; i++ {
 		queue, nextQueue = nextQueue, make(map[string]struct{})
 
+		if len(queue) == 0 {
+			break
+		}
+
 		for url := range queue {
 			if _, ok := seen[url]; ok {
 				continue
@@ -53,7 +57,9 @@ func Crawl(urlStr string, maxDepth int, keepFn func(string) bool) ([]string, err
 			seen[url] = struct{}{}
 
 			for _, link := range parsePageLinks(url, keepFn) {
-				nextQueue[link] = struct{}{}
+				if _, ok := seen[link]; !ok {
+					nextQueue[link] = struct{}{}
+				}
 			}
 		}
 	}
