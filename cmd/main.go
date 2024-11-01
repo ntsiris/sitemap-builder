@@ -3,10 +3,9 @@ package main
 import (
 	"flag"
 	"fmt"
-	"io"
-	"log"
-	"net/http"
-	"os"
+	"strings"
+
+	"github.com/ntsiris/sitemap-builder/internal/utils"
 )
 
 func main() {
@@ -16,26 +15,40 @@ func main() {
 
 	if *urlFlag == "" {
 		fmt.Println("No URL provided. Please specify a URL with the -url flag.")
-	} else {
-		fmt.Printf("URL provided: %s\n", *urlFlag)
 	}
 
 	/*
-		1. Get the HTML page
-		2. Parse all the links on the page
-		3. Build proper urls with our links
-		4. Filter out any links with a different domain
-		5. Find all pages (bfs)
-		6. Generate XML
+
+		Process:
+			1. Get the HTML page
+			2. Parse all the links on the page
+			3. Build proper urls with our links
+			4. Filter out any links with a different domain
+			5. Find all pages (bfs)
+			6. Generate XML
 	*/
 
-	// Get the HTML Page
-	resp, err := http.Get(*urlFlag)
-	if err != nil {
-		log.Fatalf("Failed to get site \"%s\": %v", *urlFlag, err)
-	}
-	// Not closing the response body can cause a memory leak
-	defer resp.Body.Close()
+	/*
+		Link cases:
+			Handle:
+				-> /some-path [add domain]
+				-> https://example.com/some-path
 
-	io.Copy(os.Stdout, resp.Body)
+			Do not Handle:
+				-> #fragment [Don't handle]
+				-> mailto:someone@example.com [Don't handle]
+	*/
+
+	base, pages := utils.ParsePageLinks(*urlFlag)
+	pages = utils.FilterExternal(pages, withPrefix(base))
+
+	for _, page := range pages {
+		fmt.Println(page)
+	}
+}
+
+func withPrefix(prefix string) func(string) bool {
+	return func(link string) bool {
+		return strings.HasPrefix(link, prefix)
+	}
 }

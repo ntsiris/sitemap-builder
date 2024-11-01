@@ -88,7 +88,7 @@ func buildHTMLLink(node *html.Node) HTMLLink {
 
 	for _, attr := range node.Attr {
 		if attr.Key == "href" {
-			ret.Href = attr.Key
+			ret.Href = attr.Val
 			break
 		}
 	}
